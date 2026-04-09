@@ -2,6 +2,12 @@
 
 Kubernetes-based logging PoC for Ematiq, running locally on **k3d**.
 
+## Architecture
+
+![Architecture Diagram](docs/architecture.png)
+
+> Full diagram also on [Excalidraw](https://excalidraw.com/#json=bclp_jMEWDbeEi77cdBle,yFUW3aoBWhxyFn6Lr8I9ig)
+
 ## Stack
 
 | Component | Role |
