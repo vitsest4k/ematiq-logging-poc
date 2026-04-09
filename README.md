@@ -19,6 +19,19 @@ Kubernetes-based logging PoC for Ematiq, running locally on **k3d**.
 | **Vector Aggregator** | Receives logs from external servers |
 | **Grafana** | Dashboards + ClickHouse datasource |
 
+## Prerequisites
+
+The following tools must be installed and available on `PATH`:
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Container runtime for k3d | docker.com |
+| [k3d](https://k3d.io) v5+ | Local Kubernetes via Docker | `brew install k3d` |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | Kubernetes CLI | `brew install kubectl` |
+| [Helm](https://helm.sh) v3+ | Deploys Vector + Grafana | `brew install helm` |
+
+**Resource requirements:** Docker Desktop should have at least **6 GB RAM** and **4 CPUs** allocated (Settings → Resources).
+
 ## Quick Start
 
 ```bash
