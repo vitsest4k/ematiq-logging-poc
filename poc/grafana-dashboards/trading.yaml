@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-trading
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  trading.json: |
+    {
+      "id": null,
+      "uid": "trading-poc",
+      "title": "Trading",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": {"from": "now-1h", "to": "now"},
+      "timepicker": {},
+      "panels": [
+        {
+          "id": 1,
+          "type": "barchart",
+          "title": "p99 Latency by Symbol (µs)",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+              "rawSql": "SELECT fields['symbol'] AS symbol, quantile(0.99)(toFloat64OrZero(fields['latency_us'])) AS p99 FROM default.logs WHERE service='order-executor' AND $__timeFilter(timestamp) GROUP BY symbol ORDER BY p99 DESC"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {"defaults": {}, "overrides": []}
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Risk Check Failures",
+          "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+              "rawSql": "SELECT countIf(fields['risk_check']='failed') AS failures FROM default.logs WHERE service='order-executor' AND $__timeFilter(timestamp)"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {"defaults": {}, "overrides": []}
+        },
+        {
+          "id": 3,
+          "type": "table",
+          "title": "Halt Actions by Portfolio",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+              "rawSql": "SELECT fields['portfolio'] AS portfolio, countIf(fields['action']='halt') AS halts FROM default.logs WHERE service='risk-server' AND $__timeFilter(timestamp) GROUP BY portfolio ORDER BY halts DESC"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {"defaults": {}, "overrides": []}
+        },
+        {
+          "id": 4,
+          "type": "logs",
+          "title": "Recent Risk Breaches",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+              "rawSql": "SELECT timestamp, level, message, fields['portfolio'] AS portfolio, fields['action'] AS action FROM default.logs WHERE service='risk-server' ORDER BY timestamp DESC LIMIT 50"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {"defaults": {}, "overrides": []}
+        }
+      ]
+    }

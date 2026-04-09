@@ -1,0 +1,10 @@
+# Internal planning docs
+docs/
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp

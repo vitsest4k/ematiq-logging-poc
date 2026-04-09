@@ -1,0 +1,11 @@
+apiVersion: clickhouse.com/v1alpha1
+kind: KeeperCluster
+metadata:
+  name: logs-keeper
+  namespace: logging
+spec:
+  replicas: 1
+  dataVolumeClaimSpec:
+    resources:
+      requests:
+        storage: 5Gi

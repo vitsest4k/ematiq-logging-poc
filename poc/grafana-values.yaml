@@ -1,0 +1,33 @@
+adminPassword: admin  # intentionally insecure — local PoC only
+
+plugins:
+  - grafana-clickhouse-datasource
+
+persistence:
+  enabled: true
+  size: 1Gi
+
+service:
+  type: NodePort
+  nodePort: 30000
+
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    labelValue: "1"
+    searchNamespace: ALL
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: ClickHouse
+        type: grafana-clickhouse-datasource
+        uid: clickhouse-poc
+        isDefault: true
+        jsonData:
+          server: logs-clickhouse-0-0-0.logs-clickhouse-headless.logging.svc.cluster.local
+          port: "8123"
+          protocol: http
+          defaultDatabase: default

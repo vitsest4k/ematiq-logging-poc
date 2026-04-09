@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-storage-config
+  namespace: logging
+data:
+  storage.xml: |
+    <clickhouse>
+      <storage_configuration>
+        <disks>
+          <s3_cold>
+            <type>s3</type>
+            <endpoint>http://minio.logging.svc.cluster.local:9000/clickhouse-cold/</endpoint>
+            <access_key_id>minioadmin</access_key_id>
+            <secret_access_key>minioadmin</secret_access_key>
+          </s3_cold>
+        </disks>
+        <policies>
+          <tiered>
+            <volumes>
+              <hot>
+                <disk>default</disk>
+              </hot>
+              <cold>
+                <disk>s3_cold</disk>
+              </cold>
+            </volumes>
+          </tiered>
+        </policies>
+      </storage_configuration>
+    </clickhouse>

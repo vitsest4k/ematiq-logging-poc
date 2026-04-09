@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trading-log-generator
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-executor
+  template:
+    metadata:
+      labels:
+        app: order-executor
+    spec:
+      containers:
+        - name: generator
+          image: alpine:3.19
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              SYMBOLS="AAPL TSLA MSFT GOOGL AMZN"
+              i=0
+              while true; do
+                i=$((i+1))
+                IDX=$(( (i % 5) + 1 ))
+                SYMBOL=$(echo "$SYMBOLS" | tr ' ' '\n' | sed -n "${IDX}p")
+                LATENCY=$(( (RANDOM % 900) + 100 ))
+                PNL=$(awk "BEGIN {printf \"%.2f\", ($RANDOM/32767)*200 - 100}")
+                RISK=$([ $(( RANDOM % 10 )) -gt 1 ] && echo "passed" || echo "failed")
+                LEVEL=$([ "$RISK" = "failed" ] && echo "ERROR" || echo "INFO")
+                printf '{"level":"%s","message":"order executed","service":"order-executor","order_id":"ord-%d","symbol":"%s","latency_us":%d,"pnl":%s,"risk_check":"%s"}\n' \
+                  "$LEVEL" "$i" "$SYMBOL" "$LATENCY" "$PNL" "$RISK"
+                sleep 1
+              done

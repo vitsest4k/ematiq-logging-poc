@@ -1,0 +1,38 @@
+apiVersion: clickhouse.com/v1alpha1
+kind: ClickHouseCluster
+metadata:
+  name: logs
+  namespace: logging
+spec:
+  replicas: 1
+  shards: 1
+  keeperClusterRef:
+    name: logs-keeper
+  containerTemplate:
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "250m"
+      limits:
+        memory: "4Gi"
+        cpu: "2"
+  dataVolumeClaimSpec:
+    resources:
+      requests:
+        storage: 10Gi
+  settings:
+    extraConfig:
+      storage_configuration:
+        disks:
+          s3_cold:
+            type: s3
+            endpoint: "http://minio.logging.svc.cluster.local:9000/clickhouse-cold/"
+            access_key_id: minioadmin
+            secret_access_key: minioadmin
+        policies:
+          tiered:
+            volumes:
+              default:
+                disk: default
+              cold:
+                disk: s3_cold

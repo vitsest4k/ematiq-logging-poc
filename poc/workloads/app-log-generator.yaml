@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-log-generator
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-log-generator
+  template:
+    metadata:
+      labels:
+        app: app-log-generator
+    spec:
+      containers:
+        - name: generator
+          image: alpine:3.19
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                echo "INFO  Starting order reconciliation loop"
+                sleep 1
+                echo "INFO  Connected to market data feed"
+                sleep 1
+                echo "WARN  Order queue depth 847 exceeds threshold"
+                sleep 1
+                echo "ERROR Failed to connect to market data feed: timeout"
+                sleep 1
+                echo "INFO  Risk check passed for portfolio rebalance"
+                sleep 1
+                echo "WARN  Latency spike detected: 1200ms"
+                sleep 1
+              done

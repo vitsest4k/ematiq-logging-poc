@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-log-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  log-overview.json: |
+    {
+      "id": null,
+      "uid": "log-overview-poc",
+      "title": "Log Overview",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": {"from": "now-1h", "to": "now"},
+      "timepicker": {},
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Log Volume by Service",
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+              "rawSql": "SELECT toStartOfMinute(timestamp) AS time, service, count() AS value FROM default.logs WHERE $__timeFilter(timestamp) GROUP BY time, service ORDER BY time"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {"defaults": {}, "overrides": []}
+        },
+        {
+          "id": 2,
+          "type": "barchart",
+          "title": "Log Count by Environment",
+          "gridPos": {"h": 8, "w": 8, "x": 0, "y": 8},
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+              "rawSql": "SELECT env, count() AS cnt FROM default.logs WHERE $__timeFilter(timestamp) GROUP BY env ORDER BY cnt DESC"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {"defaults": {}, "overrides": []}
+        },
+        {
+          "id": 3,
+          "type": "table",
+          "title": "Error Rate by Service (Last Hour)",
+          "gridPos": {"h": 8, "w": 16, "x": 8, "y": 8},
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+              "rawSql": "SELECT service, countIf(level='ERROR') AS errors, count() AS total, round(countIf(level='ERROR') / count() * 100, 2) AS pct FROM default.logs WHERE timestamp > now() - INTERVAL 1 HOUR GROUP BY service ORDER BY errors DESC"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {"defaults": {}, "overrides": []}
+        },
+        {
+          "id": 4,
+          "type": "logs",
+          "title": "Recent Errors and Warnings",
+          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 16},
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-poc"},
+              "rawSql": "SELECT timestamp, service, level, message FROM default.logs WHERE level IN ('ERROR','WARN') ORDER BY timestamp DESC LIMIT 100"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {"defaults": {}, "overrides": []}
+        }
+      ]
+    }
